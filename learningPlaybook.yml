@@ -1,0 +1,28 @@
+---
+- hosts: sandbox
+  become: yes
+  vars_files:
+    - "/home/ansible/vars/vars.yml"
+  tasks:
+    - name: install software
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - httpd
+        - nginx
+      notify: httpd service
+      tags:
+        - install_software
+    - name: create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ directories }}"
+  handlers:
+    - name: httpd service
+      service:
+        name: httpd
+        state: started
+      listen: httpd service
