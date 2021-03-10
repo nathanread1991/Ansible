@@ -1,0 +1,12 @@
+---
+- hosts: windows
+  tasks:
+    - name: install notepad++
+      win_chocolatey:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - putty.install
+        - nodejs.install
+        - notepadplusplus
+        - winscp.install
