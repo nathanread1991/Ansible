@@ -1,0 +1,15 @@
+---
+- hosts: sandbox
+  become: true
+  become_method: su
+  become_user: mbadm
+  vars:
+    IIB_NODE: nathans_IIB
+    ansible_become_pass: password123
+  tasks:
+    - name: deploy script
+      template:
+        src: /home/ansible/templates/sandbox/configservice.j2
+        dest: /home/mbadm/config.bat
+        backup: true
+        mode: 0744

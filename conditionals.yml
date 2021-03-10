@@ -1,0 +1,17 @@
+---
+- hosts: sandbox
+  vars:
+    target_file: /home/ansible/serverinfo
+  tasks:
+    - name: gather file info
+      stat:
+        path: "{{ target_file }}"
+      register: hostname
+    - name: debug hostname
+      debug:
+        var: hostname
+
+
+    - name: rename file when found
+      command: mv "{{ target_file }}" /home/ansible/serverinfo.old
+      when: hostname.stat.exists == true

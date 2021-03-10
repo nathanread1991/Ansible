@@ -1,0 +1,14 @@
+---
+- hosts: sandbox
+  become: true
+  tasks:
+    - name: ensure chrony is installed
+      yum:
+        name: chrony
+        state: present
+    - name: ensure chrony is running
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+
