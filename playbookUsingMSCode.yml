@@ -1,0 +1,16 @@
+---
+- name: create a test playbook
+  hosts: localhost
+  become: true
+  tasks:
+    - name: installing httpd
+      yum:
+        name: httpd
+        state: present
+        update_cache: yes
+
+    - name: restart httpd service
+      service:
+        name: httpd
+        state: restarted
+...
