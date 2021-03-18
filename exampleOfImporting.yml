@@ -1,0 +1,21 @@
+---
+- hosts: sandbox
+
+ #var_files:
+ #  - example_var_file.yml
+
+  pre_tasks:
+    - name: doing pre-tasks
+      debug:
+        msg: doing pretasks
+  
+ #handlers:
+  # - import_tasks: example_handlers_file.yml
+  
+  tasks:
+    - name:
+      debug:
+        msg: running tasks
+  # - import_tasks: example_task_file.yml
+
+
