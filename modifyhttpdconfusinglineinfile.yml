@@ -1,0 +1,74 @@
+---
+- hosts: sandbox
+  vars: 
+    httpd_conf_path: "/etc/httpd/conf/httpd.conf"
+    http_port: "80"
+    httpd_user: apache
+    httpd_group: apache
+    #installDB: true
+    #vars_files:
+    #- vars.yml
+
+    #pre_tasks:
+    #- include_vars: "{{ item }}"
+    #  with_first_found:
+    #    - "apache_{{ ansible_os_family }}.yml"
+    #    - "apache_default.yml" 
+  vars_prompt:
+    - name: share_user
+      prompt: "what is your network share user"
+
+    - name: share_pass
+      prompt: "what is your share password"
+      private: yes
+
+  tasks:
+    - name: backup httpd.conf before making changes
+      copy:
+        src: "{{httpd_conf_path}}"
+        dest: "{{httpd_conf_path}}.bak{{ansible_date_time.iso8601_basic_short}}"
+    - name: add conf changes
+      lineinfile:
+        dest: "{{httpd_conf_path}}"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+        state: "present"
+      with_items:
+        - regexp: "^Listen "
+          line: "Listen {{http_port}}"
+        - regexp: "^User "
+          line: "User {{httpd_user}}"
+        - regexp: "^Group "
+          line: "User {{httpd_group}}"
+    - name: printing out variable from variable file
+      debug:
+        msg: "printing variable value from file {{ my_var }}"
+    - name: "install db if install db variable is set to true"
+      yum:
+        name: mysql-server
+        state: present
+      when: (installDB is defined) and installDB == true
+    - name: get value of sssd status
+      command:
+        cmd: "systemctl status sssd"
+      register: sssd_output
+    - name: print sssd_output
+      debug:
+        msg: "Service is Running"
+      when: " 'Active: active (running)' in sssd_output.stdout"
+
+    - name: list files in ansible home dir
+      find:
+        paths: /home/ansible
+        patterns: "*"
+        file_type: any
+        recurse: no
+      register: files_in_home_dir
+    - name:
+      debug:
+        msg: "files in home dir: {{ files_in_home_dir }}"
+    - name: print user and password
+      debug:
+        msg: "{{ share_user }} and {{ share_pass }}"
+
+

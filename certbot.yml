@@ -1,0 +1,47 @@
+---
+- hosts: sandbox
+  become: yes
+  become_user: root
+  tasks:
+    - name: install epel-release-latest
+      dnf:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+        state: installed
+    - name: install 
+      command:
+        cmd: "dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms"
+        creates: "/var/cache/dnf/codeready-builder-for-rhel-8-rhui-rpms*"
+        warn: no
+
+    - name: install snapd
+      yum:
+        name: snapd
+        state: latest
+        update_cache: yes
+    - name: enable main snap communication socket via systemd
+      systemd:
+        name: snapd.socket
+        enabled: yes
+        state: started
+    - name: restart snapd service
+      service:
+        name: snapd
+        state: restarted
+    - name: create symbolic link
+      file:
+        path: "/snap"
+        state: link
+        src: "/var/lib/snapd/snap"
+    - name: install certbot
+      command:
+        cmd: "snap install --classic certbot"
+        creates: "/var/snap/certbot/1042"
+        warn: no
+    - name: create cert via certbot
+      command:
+        cmd: "/var/lib/snapd/snap/bin/certbot certonly --standalone --non-interactive --agree-tos -m nathanread1991@gmail.com -d nathanread.tk"
+        warn: no
+
+    
+
+    

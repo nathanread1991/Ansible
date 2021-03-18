@@ -1,0 +1,9 @@
+---
+- hosts: sandbox
+  tasks:
+  # Install and configure Apache on RHEL / CentOS hosts
+    - block:
+      - yum: name=httpd state=present
+      - service: name=httpd state=started enabled=yes
+      when: ansible_os_family == 'RedHat'
+      become: yes
