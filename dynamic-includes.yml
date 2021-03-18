@@ -1,0 +1,20 @@
+- hosts: sandbox
+  vars:
+    playbook_name: "{{ (lookup('file', '/proc/self/cmdline') | regex_replace('\u0000',' ')).split()|select('match','^[a-z-_/]*[.]y[a]*ml')|list|first|basename }}"
+
+  tasks:
+    - name:  
+      debug:
+        msg: "this is the standard run {{ playbook_name }} "
+    - name: checking for an extra tasks file extra_tasks_<playbookName>
+      stat:
+        path: "extra_tasks_{{ playbook_name }}"
+      register: extra_tasks_file
+      connection: local
+    - name: print registered extra_tasks_variable
+      debug:
+        msg: "{{ extra_tasks_file }}"
+
+    - include_tasks: "extra_tasks_{{ playbook_name }}"
+      when: extra_tasks_file.stat.exists
+      

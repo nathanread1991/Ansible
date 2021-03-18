@@ -1,0 +1,3 @@
+- name: test message to prove dynamic import works
+  debug:
+    msg: testing my new dynamic import
