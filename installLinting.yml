@@ -1,0 +1,21 @@
+---
+- name: install yamllint
+  pip:
+    name: yamllint
+    version: 1.9.0
+    executable: pip3
+
+- name: install ansible-lint
+  pip:
+    name: ansible-lint
+    version: 1.9.0
+    executable: pip3
+
+- name: run ansible lint version command and register variable
+  command:
+    cmd: ansible-lint --version
+  register: ansible-lint-version
+
+- name: print ansible version
+  debug:
+    msg: "ansible-lint version: {{ ansible-lint-version }}" 
