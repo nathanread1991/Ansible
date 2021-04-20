@@ -1,0 +1,33 @@
+---
+- hosts: sandbox
+  tasks:
+    - name: install yamllint
+      pip:
+        name: yamllint
+        version: 1.9.0
+        executable: pip3
+
+    - name: install ansible-lint
+      pip:
+        name: ansible-lint
+        executable: pip3
+
+    - name: run ansible lint version command and register variable
+      command:
+        cmd: ansible-lint --version
+      changed_when: false
+      register: ansible_lint_version
+
+    - name: print ansible-lint version
+      debug:
+        msg: "ansible-lint version: {{ ansible_lint_version }}"
+
+    - name: run yamllint version command and register variable
+      command:
+        cmd: yamllint --version
+      register: yaml_lint_version
+      changed_when: false
+
+    - name: print yamllint version
+      debug:
+        msg: "yamllint version: {{ yaml_lint_version }}"
