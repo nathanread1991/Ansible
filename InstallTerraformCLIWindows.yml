@@ -1,0 +1,22 @@
+---
+- hosts: windows
+  vars:
+    terraform_version: "0.14.10"
+  tasks:
+    - name: install Terraform CLI on Windows
+      win_chocolatey:
+        name: terraform
+        state: present
+        version: "{{ terraform_version }}"
+
+    - name: run terraform version command and store output in variable
+      win_command: "terraform -version"
+      register: terraform_version
+      changed_when: false
+
+    - name: use debug to print out version
+      debug:
+        msg: "terraform version {{ terraform_version.stdout }}"
+
+        
+        

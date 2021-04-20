@@ -4,7 +4,8 @@
 
   vars:
     node_apps_location: /usr/local/opt/node
-  pre_tasks:
+
+  tasks:
     - name: Install EPEL repo.
       yum: name=epel-release state=present
 
@@ -19,9 +20,12 @@
         disable_gpg_check: True
         state: present
 
-  roles:
-    - nodejs
-  tasks:
+    - name: Install Node.js and npm.
+      yum: name=npm state=present enablerepo=epel
+
+    - name: Install Forever (to run our Node.js app).
+      npm: name=forever global=yes state=present
+
     - name: Ensure Node.js app folder exists.
       file: "path={{ node_apps_location }} state=directory"
 
@@ -43,9 +47,3 @@
     - name: Start example Node.js app.
       command: "forever start {{ node_apps_location }}/app/app.js"
       when: "forever_list.stdout.find(node_apps_location + '/app/app.js') == -1"
-
-    - name: copy file example from file dir within role
-      copy:
-        src: /home/ansible/playbooks/Ansible/nodejs/roles/nodejs/files/nathan.txt
-        dest: /tmp/nathan.txt
-        mode: "0644"
