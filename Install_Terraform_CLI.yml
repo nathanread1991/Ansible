@@ -1,19 +1,54 @@
 ---
-- hosts: windows
+- hosts: both
   vars:
     terraform_version: "0.14.10"
+    terraform_url: "https://releases.hashicorp.com/terraform/0.15.0/terraform_0.15.0_linux_amd64.zip"
+    terraform_installation_path: "/usr/local/bin"
   tasks:
-    - name: install Terraform CLI on Windows
-      win_chocolatey:
-        name: terraform
-        state: present
-        version: "{{ terraform_version }}"
+    - block:
+      - name: install Terraform CLI on Windows
+        win_chocolatey:
+          name: terraform
+          state: present
+          version: "{{ terraform_version }}"
+  
+      - name: run terraform version command and store output in variable
+        win_command: "terraform -version"
+        register: terraform_version
+        changed_when: false
 
-    - name: run terraform version command and store output in variable
-      win_command: "terraform -version"
-      register: terraform_version
-      changed_when: false
+      - name: use debug to print out version
+        debug:
+          msg: "terraform version {{ terraform_version.stdout }}"
 
-    - name: use debug to print out version
-      debug:
-        msg: "terraform version {{ terraform_version.stdout }}"
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: install unzip
+        yum:
+          name: unzip
+          state: present
+
+      - name: download terraform zip
+        get_url:
+          url: "{{ terraform_url }}"
+          dest: /tmp/terraform.zip
+          mode: '0770'
+
+      - name: unzip terraform into install dir
+        unarchive:
+          src: /tmp/terraform.zip
+          dest: "{{ terraform_installation_path }}"
+          remote_src: yes
+
+      - name: check terraform is installed
+        command: "terraform -v"
+        changed_when: false
+        register: terraform_version
+
+      - name: use debug to print out version
+        debug:
+          msg: "terraform version {{ terraform_version.stdout }}"
+      become: true
+      when: ansible_os_family == "RedHat"
+          
