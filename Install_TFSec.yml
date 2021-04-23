@@ -1,0 +1,34 @@
+---
+- hosts: both
+  vars:
+    TFSEC_VERSION: "0.39.23"
+    TFSEC_URL: "https://github.com/tfsec/tfsec/releases/download/v{{ TFSEC_VERSION }}/tfsec-linux-amd64"
+    TFSEC_INSTALLATION_PATH: "/usr/local/bin"
+  tasks:
+    - block:
+      - name: install TFSEC on Windows
+        win_chocolatey:
+          name: tfsec
+          state: present
+          version: "{{ TFSEC_VERSION }}"
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: install unzip on linux if not instlled
+        yum:
+          name: unzip
+          state: present
+      - name: download and install TFSec
+        get_url:
+          url: "{{ TFSEC_URL }}"
+          dest: "/tmp/tfsec"
+          mode: '0755'
+      - name: copy TFSec binary into installation dir
+        copy: 
+          remote_src: True 
+          src: /tmp/tfsec
+          mode: "0755"
+          dest: "{{ TFSEC_INSTALLATION_PATH }}"
+      become: true
+      when: ansible_os_family == "RedHat"
+          
