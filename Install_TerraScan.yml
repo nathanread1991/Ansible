@@ -1,0 +1,36 @@
+---
+- hosts: sandbox
+  vars:
+    TERRASCAN_VERSION: "1.5.0"
+    TERRASCAN_URL: "https://github.com/accurics/terrascan/releases/download/v{{  TERRASCAN_VERSION }}/terrascan_1.5.0_Windows_x86_64.tar.gz"
+    TERRASCAN_PACKAGE_NAME: "terrascan_1.5.0_Windows_x86_64.tar.gz"
+    TERRASCAN_INSTALLATION_PATH: 'C:\TerraScan'
+  tasks:
+    - block:
+      - name: Create TerraScan Installation Dir
+        win_file:
+          path: "{{ TERRASCAN_INSTALLATION_PATH }}"
+          state: directory
+      - name: download TerraScan
+        win_get_url:
+          url: "{{ TERRASCAN_URL }}"
+          dest: '{{ TERRASCAN_INSTALLATION_PATH }}\{{ TERRASCAN_PACKAGE_NAME }}'
+       
+      - name: untar Terrascan 
+        win_shell: 'tar -xvf {{ TERRASCAN_PACKAGE_NAME }}'  
+        args:
+          chdir: "{{ TERRASCAN_INSTALLATION_PATH }}"
+          creates: '{{ TERRASCAN_INSTALLATION_PATH }}\terrascan.exe'
+
+      - name: add path entry for TerraScan
+        win_path:
+          elements: "{{ TERRASCAN_INSTALLATION_PATH }}"
+          state: present
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: testing block
+        debug:
+          msg: testing shiz
+      when: ansible_os_family == "RedHat"
+          

@@ -1,0 +1,30 @@
+---
+- hosts: sandbox
+  vars:
+    TERRASCAN_VERSION: "0.2.3"
+  tasks:
+    - block:
+      - name: get python installation dir on windows
+        # uses python to get path of where python is installed and registers in var
+        win_command: 'python -c "import os, sys; print(os.path.dirname(sys.executable))"'
+        register: python_path
+
+      - name: pip install terrascan on windows
+        win_command: "pip install terrascan=={{ TERRASCAN_VERSION }}"
+        args:
+          # using filter to strip "\r\n" off the end of the stdout of the registered var held in python_path
+          # the creates looks for the existance of terrascan.exe under the Scripts dir of the python installation dir
+          creates: '{{ python_path.stdout | regex_replace("\r\n", "") }}\Scripts\terrascan.exe'
+
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: pip install terrascan on linux
+        pip:
+          name: terrascan
+          state: present
+          version: "{{ TERRASCAN_VERSION }}"
+          executable: pip3
+          extra_args: --user
+      when: ansible_os_family == "RedHat"
+          
