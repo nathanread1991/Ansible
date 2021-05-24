@@ -1,0 +1,28 @@
+---
+- hosts: windows
+  vars:
+    python_version: "3.9.4"
+    yamllint_version: "1.9.0"
+    ansiblelint_version: "5.0.7"
+  tasks:
+    - name: install python3 using chocolatey
+      win_chocolatey:
+        name: python3
+        state: present
+        #version: "{{ python_version }}"
+
+    - name: install yamllint
+      win_command: "pip install yamllint=={{ yamllint_version }}"
+      args:
+        creates: C:\Python39\Scripts\yamllint.exe
+
+    - name: install ansible-lint
+      win_command: "pip install ansible-lint=={{ ansiblelint_version }}"
+      args:
+        creates: C:\Python39\Scripts\ansible-lint.exe
+
+        
+
+
+    
+    

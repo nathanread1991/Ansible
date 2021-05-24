@@ -1,0 +1,13 @@
+---
+- name: Install Node.Js (npm plus all its dependencies
+  yum:
+    name: npm
+    state: present
+    enablerepo: epel
+
+- name: Install forever module to run our NodeJs App
+  npm:
+    name: "{{ item }}"
+    global: yes
+    state: present
+  with_items: "{{ node_npm_modules }}"

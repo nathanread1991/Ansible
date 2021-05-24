@@ -1,0 +1,61 @@
+---
+- hosts: windows
+  vars:
+    TERRASCAN_VERSION: "1.5.0"
+    TERRASCAN_PACKAGE_NAME_WINDOWS: "terrascan_{{ TERRASCAN_VERSION }}_Windows_x86_64.tar.gz"
+    TERRASCAN_PACKAGE_NAME_LINUX: "terrascan_{{ TERRASCAN_VERSION }}_Linux_x86_64.tar.gz"
+    TERRASCAN_URL_WINDOWS: "https://github.com/accurics/terrascan/releases/download/v{{ TERRASCAN_VERSION }}/{{ TERRASCAN_PACKAGE_NAME_WINDOWS }}"
+    TERRASCAN_URL_LINUX: "https://github.com/accurics/terrascan/releases/download/v{{ TERRASCAN_VERSION }}/{{ TERRASCAN_PACKAGE_NAME_LINUX }}"
+    TERRASCAN_INSTALLATION_PATH_WINDOWS: 'C:\TerraScan'
+    TERRASCAN_INSTALLATION_PATH_LINUX: "/usr/local/bin"
+
+  tasks:
+    - block:
+      - name: Create TerraScan Installation Dir on Windows
+        win_file:
+          path: "{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}"
+          state: directory
+      - name: download TerraScan on Windows
+        win_get_url:
+          url: "{{ TERRASCAN_URL_WINDOWS }}"
+          dest: '{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}\{{ TERRASCAN_PACKAGE_NAME_WINDOWS }}'
+       
+      - name: untar Terrascan on Windows
+        win_shell: 'tar -xvf {{ TERRASCAN_PACKAGE_NAME_WINDOWS }}'  
+        args:
+          chdir: "{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}"
+          creates: '{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}\terrascan.exe'
+
+      - name: add path entry for TerraScan on Windows
+        win_path:
+          elements: "{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}"
+          state: present
+
+      - name: remove terrascan tar (housekeeping) on windows
+        win_file:
+          state: absent
+          path: '{{ TERRASCAN_INSTALLATION_PATH_WINDOWS }}\{{ TERRASCAN_PACKAGE_NAME_WINDOWS }}'
+          
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: download terrascan on linux
+        get_url:
+          url: "{{ TERRASCAN_URL_LINUX }}"
+          dest: "/tmp/{{ TERRASCAN_PACKAGE_NAME_LINUX }}"
+          mode: "0770"
+          
+      - name: untar Terrascan on linux
+        unarchive:
+          src: "/tmp/{{ TERRASCAN_PACKAGE_NAME_LINUX }}"
+          dest: "{{ TERRASCAN_INSTALLATION_PATH_LINUX }}"
+          remote_src: yes
+          mode: "0755"
+
+      - name: remove tarfile for housekeeping on linux
+        file:
+          state: absent
+          path: "/tmp/{{ TERRASCAN_PACKAGE_NAME_LINUX }}"
+      become: true    
+      when: ansible_os_family == "RedHat"
+          

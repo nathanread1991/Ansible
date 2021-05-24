@@ -1,0 +1,12 @@
+---
+- hosts: windows
+  vars:
+    yamllint_version: "1.9.0"
+    ansiblelint_version: "5.0.7"
+  tasks:
+    - name: install yamllint
+      win_command: "pip uninstall yamllint=={{ yamllint_version }} -y" 
+     
+    - name: install ansible-lint
+      win_command: "pip uninstall ansible-lint=={{ ansiblelint_version }} -y"
+      

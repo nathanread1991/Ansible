@@ -1,0 +1,36 @@
+---
+- hosts: both
+  vars:
+    TFLINT_VERSION: "0.27.0"
+    TFLINT_URL: "https://github.com/terraform-linters/tflint/releases/download/v{{TFLINT_VERSION}}/tflint_linux_amd64.zip"
+    TFLINT_INSTALLATION_PATH: "/usr/local/bin"
+  tasks:
+    - block:
+      - name: install TFLint on Windows
+        win_chocolatey:
+          name: tflint
+          state: present
+          version: "{{ TFLINT_VERSION }}"
+      when: ansible_os_family == "Windows"
+
+    - block:
+      - name: install TFLint on linux
+        yum:
+          name: unzip
+          state: present
+
+      - name: download TFLint zip
+        get_url:
+          url: "{{ TFLINT_URL }}"
+          dest: /tmp/tflint.zip
+          mode: '0770'
+
+      - name: unzip TFLint into install dir
+        unarchive:
+          src: /tmp/tflint.zip
+          dest: "{{ TFLINT_INSTALLATION_PATH }}"
+          remote_src: yes
+
+      become: true
+      when: ansible_os_family == "RedHat"
+          
