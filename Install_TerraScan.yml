@@ -1,7 +1,7 @@
 ---
-- hosts: windows
+- hosts: sandbox
   vars:
-    TERRASCAN_VERSION: "1.5.0"
+    TERRASCAN_VERSION: "1.6.0"
     TERRASCAN_PACKAGE_NAME_WINDOWS: "terrascan_{{ TERRASCAN_VERSION }}_Windows_x86_64.tar.gz"
     TERRASCAN_PACKAGE_NAME_LINUX: "terrascan_{{ TERRASCAN_VERSION }}_Linux_x86_64.tar.gz"
     TERRASCAN_URL_WINDOWS: "https://github.com/accurics/terrascan/releases/download/v{{ TERRASCAN_VERSION }}/{{ TERRASCAN_PACKAGE_NAME_WINDOWS }}"
