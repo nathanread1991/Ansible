@@ -1,0 +1,68 @@
+---
+- hosts: sandbox
+  tasks:
+    - name: show facts on system
+      debug:
+        var: ansible_facts
+      tags:
+        - facts
+    - name: print based on facts
+      debug:
+        msg: "facts are true"
+      when: (ansible_facts.os_family == 'RedHat' and ansible_facts.machine == 'x86_64') or
+            (ansible_facts.os_family == 'windows')
+
+   
+    - name: 'os version greater than 6.0'
+      debug:
+        msg: "greater than 6.0: {{ ansible_facts.distribution_version }}"
+      when: ansible_facts.distribution_version | float >= 6.0
+
+    
+    - name: Register a variable
+      shell: cat /etc/motd
+      register: motd_contents
+    
+    - name: use var in conditional
+      debug:
+        msg: "{{ motd_contents }}"
+
+    - name: blaaaaaaa
+      shell: echo "quote"
+      when: motd_contents.stdout.find('"') != -1
+
+    - name: netstat
+      shell: netstat -aon
+      register: netstat_contents
+
+    - name: use var in conditional
+      debug:
+        msg: "{{ netstat_contents }}"
+
+    - name: blaaaaaaa
+      shell: echo "43390"
+      when: netstat_contents.stdout.find('43390') != -1
+
+    - name: register a variable and ignore errors and continue
+      command: '/bin/false'
+      register: result
+      ignore_errors: true
+
+    - name: run this block only if the task above failed
+      command: echo "failure"
+      when: result is failed
+
+    - name: netstat
+      command: 'netstat -aon'
+      register: result
+      ignore_errors: true
+   
+    - name: do something only if task was successful
+      debug:
+        msg: "task was a success"
+      when: result is succeeded
+
+  # - name: Run only if the task that registered the result variable is skipped
+    # command: /bin/still/something_else
+    # when: result is skipped
+      
